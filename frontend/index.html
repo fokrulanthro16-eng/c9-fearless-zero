@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>C9 FearlessZero</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/frontend/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="command-bar">
+        <div class="command-left">
+          <div class="wordmark">C9 // FEARLESSZERO</div>
+          <select id="matchupSelect" class="tactical-select" aria-label="Matchup"></select>
+          <div id="gridIndicator" class="grid-indicator">GRID SNAPSHOT</div>
+        </div>
+        <div class="command-center">
+          <div id="seriesRibbon" class="series-ribbon" aria-label="Best of five series"></div>
+          <div id="turnIndicator" class="turn-indicator side-blue">
+            <span class="turn-rail"></span>
+            <span id="turnLabel" class="turn-label">LOADING</span>
+          </div>
+        </div>
+        <div class="command-right">
+          <button id="undoBtn" class="utility-button" type="button" title="Undo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H4v5"/><path d="M4 12c2-4 5-6 9-6 4.5 0 8 3.2 8 7.5S17.5 21 13 21c-2.6 0-4.9-1.1-6.3-3"/></svg>
+            <span>Undo</span><kbd>Ctrl+Z</kbd>
+          </button>
+          <button id="nextGameBtn" class="utility-button" type="button" title="Next game">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13"/><path d="m13 6 6 6-6 6"/></svg>
+            <span>Next Game</span>
+          </button>
+          <button id="briefBtn" class="utility-button" type="button" title="Coach brief">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/><path d="M8.5 11h7"/><path d="M8.5 15h7"/></svg>
+            <span>Coach Brief</span>
+          </button>
+          <button id="demoBtn" class="utility-button" type="button" title="Game 3 pinch demo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/><path d="M8 5v14"/><path d="M16 5v14"/></svg>
+            <span>G3 Pinch Demo</span>
+          </button>
+          <button id="resetBtn" class="utility-button danger" type="button" title="Reset">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"/><path d="M19 11a7 7 0 1 0-2 5"/></svg>
+            <span>Reset</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="main-shell">
+        <aside class="eval-bar" aria-label="Engine evaluation">
+          <div id="evalRed" class="eval-fill red-fill"></div>
+          <div id="evalBlue" class="eval-fill blue-fill"></div>
+          <div id="evalReadout" class="eval-readout num">0.0</div>
+        </aside>
+
+        <main class="workspace-grid">
+          <section class="team-panel blue-panel" aria-label="Cloud9 draft">
+            <div class="panel-header">
+              <span class="panel-kicker">BLUE SIDE</span>
+              <span id="blueTeamName" class="panel-title">Cloud9</span>
+            </div>
+            <div id="blueBans" class="ban-strip"></div>
+            <div id="bluePicks" class="pick-list"></div>
+            <div class="metric-block">
+              <div class="block-title">TEAM COMP METRICS</div>
+              <div id="blueMetrics" class="metric-list"></div>
+            </div>
+          </section>
+
+          <section class="center-panel" aria-label="Tactical board">
+            <div class="champion-board">
+              <div class="filter-bar">
+                <div id="roleTabs" class="role-tabs"></div>
+                <label class="search-wrap">
+                  <span class="shortcut-badge">/</span>
+                  <input id="championSearch" type="search" autocomplete="off" placeholder="Search champion">
+                </label>
+                <button id="lockToggle" class="toggle-button" type="button" aria-pressed="true">LOCKS ON</button>
+              </div>
+              <div id="championGrid" class="champion-grid"></div>
+            </div>
+
+            <div class="solver-panel">
+              <div class="solver-header">
+                <div>
+                  <span class="panel-kicker">ALPHA-BETA ENGINE</span>
+                  <span id="solverSide" class="solver-side">LOADING</span>
+                </div>
+                <div class="latency num"><span id="solverLatency">0</span>ms</div>
+              </div>
+              <div class="solver-table">
+                <div class="solver-row solver-head">
+                  <span>Rank</span>
+                  <span>Champion</span>
+                  <span>Gain</span>
+                  <span>Tag</span>
+                  <span>Reason</span>
+                  <span></span>
+                </div>
+                <div id="solverRows"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="team-panel red-panel" aria-label="Opponent draft">
+            <div class="panel-header red-align">
+              <span id="redTeamName" class="panel-title">Opponent</span>
+              <span class="panel-kicker">RED SIDE</span>
+            </div>
+            <div id="redBans" class="ban-strip"></div>
+            <div id="redPicks" class="pick-list"></div>
+            <div class="health-block">
+              <div class="block-title">COMFORT COLLAPSE INDEX</div>
+              <div id="poolHealth" class="health-table"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="briefModal" class="modal" hidden>
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="briefTitle">
+        <div class="modal-header">
+          <div>
+            <div class="panel-kicker">COACH BRIEF</div>
+            <h1 id="briefTitle">Pre-Match Dossier</h1>
+          </div>
+          <div class="modal-actions">
+            <button id="copyBriefBtn" class="utility-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h11v13H8z"/><path d="M5 16H3V3h13v2"/></svg>
+              <span>Copy</span>
+            </button>
+            <button id="closeBriefBtn" class="utility-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+              <span>Close</span>
+            </button>
+          </div>
+        </div>
+        <pre id="briefContent" class="brief-content"></pre>
+      </div>
+    </div>
+
+    <script src="/frontend/app.js" defer></script>
+  </body>
+</html>
